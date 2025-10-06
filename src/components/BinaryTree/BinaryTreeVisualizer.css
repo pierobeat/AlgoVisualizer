@@ -2,7 +2,7 @@
 
 /* 🎨 CSS Custom Properties for Theme Management */
 :root {
-  /* --primary-bg: #0f172a; */
+  --primary-bg: #0f172a;
   --secondary-bg: #1e293b;
   --card-bg: #1e293b;
   --surface-bg: #334155;
