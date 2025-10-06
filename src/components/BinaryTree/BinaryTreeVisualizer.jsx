@@ -6,7 +6,7 @@ import { layoutTree } from "./utils/layout";
 
 /**
  * 🎯 Binary Tree Visualizer Component
- * 
+ *
  * A comprehensive visualization tool for binary search tree operations
  * including insertion, deletion, search, and various traversal algorithms.
  */
@@ -15,34 +15,34 @@ export default function BinaryTreeVisualizer() {
   const [root, setRoot] = useState(null);
 
   // 🎮 UI state management
-  const [value, setValue] = useState("");           // Single operation input value
-  const [bulk, setBulk] = useState("");             // Batch insert input values
+  const [value, setValue] = useState(""); // Single operation input value
+  const [bulk, setBulk] = useState(""); // Batch insert input values
   const [animateInserts, setAnimateInserts] = useState(false); // Animation toggle
-  const [stepMode, setStepMode] = useState(false);             // Step-by-step mode
-  const [speed, setSpeed] = useState(450);                     // Animation speed
-  const [traversal, setTraversal] = useState("inorder");       // Current traversal type
-  const [isBusy, setIsBusy] = useState(false);                 // Operation in progress
+  const [stepMode, setStepMode] = useState(false); // Step-by-step mode
+  const [speed, setSpeed] = useState(450); // Animation speed
+  const [traversal, setTraversal] = useState("inorder"); // Current traversal type
+  const [isBusy, setIsBusy] = useState(false); // Operation in progress
 
   // 🎨 Animation state management
-  const [activePath, setActivePath] = useState([]);    // Current active traversal path
+  const [activePath, setActivePath] = useState([]); // Current active traversal path
   const [activeNodeId, setActiveNodeId] = useState(null); // Currently active node
-  const [visited, setVisited] = useState([]);          // Visited nodes during traversal
-  const [order, setOrder] = useState([]);              // Textual traversal order
+  const [visited, setVisited] = useState([]); // Visited nodes during traversal
+  const [order, setOrder] = useState([]); // Textual traversal order
 
   // 🔢 ID generator for tree nodes
   const idCounter = useRef(1);
-  
+
   /**
    * 🏗️ Create a new tree node with unique ID
    * @param {number} val - Node value
    * @returns {Object} New node object
    */
   function makeNode(val) {
-    return { 
-      id: idCounter.current++, 
-      val, 
-      left: null, 
-      right: null 
+    return {
+      id: idCounter.current++,
+      val,
+      left: null,
+      right: null,
     };
   }
 
@@ -61,14 +61,14 @@ export default function BinaryTreeVisualizer() {
 
   // ⏭️ Step runner for step-by-step mode
   const nextResolver = useRef(null);
-  
+
   /**
    * ⏳ Wait for next step in step-by-step mode
    * @returns {Promise} Resolves when next step is triggered
    */
   function waitForNextClick() {
-    return new Promise((resolve) => { 
-      nextResolver.current = resolve; 
+    return new Promise((resolve) => {
+      nextResolver.current = resolve;
     });
   }
 
@@ -89,22 +89,22 @@ export default function BinaryTreeVisualizer() {
    */
   async function runWithSteps(steps, postApply) {
     setIsBusy(true);
-    
+
     for (let stepIndex = 0; stepIndex < steps.length; stepIndex++) {
       const currentStep = steps[stepIndex];
-      
+
       // 🎨 Update visualization based on step type
       if (currentStep.type === "focus") {
         setActiveNodeId(currentStep.nodeId);
-        setActivePath((previousPath) => 
-          previousPath[previousPath.length - 1] === currentStep.nodeId 
-            ? previousPath 
+        setActivePath((previousPath) =>
+          previousPath[previousPath.length - 1] === currentStep.nodeId
+            ? previousPath
             : [...previousPath, currentStep.nodeId]
         );
       } else if (currentStep.type === "visit") {
-        setVisited((previousVisited) => 
-          previousVisited[previousVisited.length - 1] === currentStep.nodeId 
-            ? previousVisited 
+        setVisited((previousVisited) =>
+          previousVisited[previousVisited.length - 1] === currentStep.nodeId
+            ? previousVisited
             : [...previousVisited, currentStep.nodeId]
         );
       } else if (currentStep.type === "apply" && currentStep.snapshot) {
@@ -120,7 +120,7 @@ export default function BinaryTreeVisualizer() {
         await new Promise((resolve) => setTimeout(resolve, speed));
       }
     }
-    
+
     // 🎯 Execute post-application callback
     if (typeof postApply === "function") postApply();
     setIsBusy(false);
@@ -149,13 +149,13 @@ export default function BinaryTreeVisualizer() {
   async function onInsertOne(e) {
     e?.preventDefault?.();
     if (value === "") return;
-    
+
     const num = Number(value);
     if (!Number.isFinite(num)) return;
 
     resetHighlights();
     const { rootAfter, steps } = insertBST(root, makeNode, num);
-    
+
     if (animateInserts) {
       await runWithSteps(steps, () => setRoot(rootAfter));
     } else {
@@ -171,13 +171,13 @@ export default function BinaryTreeVisualizer() {
   async function onSearch(e) {
     e?.preventDefault?.();
     if (value === "") return;
-    
+
     const num = Number(value);
     if (!Number.isFinite(num)) return;
 
     resetHighlights();
     const { found, steps } = findBST(root, num);
-    
+
     await runWithSteps(steps, () => {
       if (!found) {
         const canvasWrapper = document.querySelector(".btv-canvas");
@@ -194,13 +194,13 @@ export default function BinaryTreeVisualizer() {
   async function onDelete(e) {
     e?.preventDefault?.();
     if (value === "") return;
-    
+
     const num = Number(value);
     if (!Number.isFinite(num)) return;
 
     resetHighlights();
     const { rootAfter, steps } = deleteBST(root, num);
-    
+
     await runWithSteps(steps, () => setRoot(rootAfter));
     setValue("");
   }
@@ -211,15 +211,15 @@ export default function BinaryTreeVisualizer() {
   async function onInsertMany() {
     const nums = parseNums(bulk);
     if (!nums.length) return;
-    
+
     resetHighlights();
     let currentRoot = root;
-    
+
     for (const num of nums) {
       const { rootAfter } = insertBST(currentRoot, makeNode, num);
       currentRoot = rootAfter;
     }
-    
+
     setRoot(currentRoot); // 🚀 Instant batch insertion
     setBulk("");
   }
@@ -230,17 +230,17 @@ export default function BinaryTreeVisualizer() {
   async function onInsertManyAnimated() {
     const nums = parseNums(bulk);
     if (!nums.length) return;
-    
+
     resetHighlights();
     let currentRoot = root;
     setIsBusy(true);
-    
+
     for (const num of nums) {
       const { rootAfter, steps } = insertBST(currentRoot, makeNode, num);
       await runWithSteps(steps);
       currentRoot = rootAfter;
     }
-    
+
     setRoot(currentRoot);
     setBulk("");
     setIsBusy(false);
@@ -257,7 +257,7 @@ export default function BinaryTreeVisualizer() {
 
     const sequence = [];
     const orderValues = [];
-    
+
     /**
      * 📝 Record node visit in traversal
      * @param {Object} node - Tree node to visit
@@ -311,12 +311,12 @@ export default function BinaryTreeVisualizer() {
     function level(node) {
       const queue = [];
       if (node) queue.push(node);
-      
+
       while (queue.length) {
         const currentNode = queue.shift();
         sequence.push({ type: "focus", nodeId: currentNode.id });
         pushVisit(currentNode);
-        
+
         if (currentNode.left) queue.push(currentNode.left);
         if (currentNode.right) queue.push(currentNode.right);
       }
@@ -352,7 +352,7 @@ export default function BinaryTreeVisualizer() {
       if (event.key === "Enter" && event.shiftKey) onDelete(event);
       if ((event.key === "n" || event.key === "N") && stepMode) handleNext();
     }
-    
+
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [stepMode, value, root]);
@@ -363,7 +363,6 @@ export default function BinaryTreeVisualizer() {
       <header className="btv-toolbar">
         <div className="btv-controls">
           <div className="btv-row">
-            
             {/* ➕ Insert Operations Card */}
             <div className="btv-card">
               <div className="btv-card-title">Insert Operations</div>
@@ -401,9 +400,9 @@ export default function BinaryTreeVisualizer() {
                 />
               </div>
               <div className="btv-input-row">
-                <button 
-                  className="btv-btn" 
-                  onClick={onInsertMany} 
+                <button
+                  className="btv-btn"
+                  onClick={onInsertMany}
                   disabled={isBusy}
                   title="Insert all values instantly"
                 >
@@ -442,17 +441,17 @@ export default function BinaryTreeVisualizer() {
                   onChange={(event) => setValue(event.target.value)}
                   aria-label="Value to search or delete"
                 />
-                <button 
-                  className="btv-btn" 
-                  onClick={onSearch} 
+                <button
+                  className="btv-btn"
+                  onClick={onSearch}
                   disabled={isBusy && stepMode}
                   title="Search for value in tree"
                 >
                   Search
                 </button>
-                <button 
-                  className="btv-btn" 
-                  onClick={onDelete} 
+                <button
+                  className="btv-btn"
+                  onClick={onDelete}
                   disabled={isBusy && stepMode}
                   title="Delete value from tree"
                 >
@@ -500,7 +499,11 @@ export default function BinaryTreeVisualizer() {
             {/* 🔄 Traversal Operations Card */}
             <div className="btv-card">
               <div className="btv-card-title">Tree Traversal Algorithms</div>
-              <div className="btv-seg" role="group" aria-label="Traversal algorithm selection">
+              <div
+                className="btv-seg"
+                role="group"
+                aria-label="Traversal algorithm selection"
+              >
                 {[
                   ["inorder", "Inorder"],
                   ["preorder", "Preorder"],
@@ -510,7 +513,9 @@ export default function BinaryTreeVisualizer() {
                   <button
                     key={key}
                     type="button"
-                    className={`btv-seg-btn ${traversal === key ? "is-active" : ""}`}
+                    className={`btv-seg-btn ${
+                      traversal === key ? "is-active" : ""
+                    }`}
                     onClick={() => onTraverse(key)}
                     disabled={!root || (isBusy && stepMode)}
                     aria-pressed={traversal === key}
@@ -522,8 +527,8 @@ export default function BinaryTreeVisualizer() {
               </div>
 
               <div className="btv-actions">
-                <button 
-                  className="btv-btn" 
+                <button
+                  className="btv-btn"
                   onClick={onClear}
                   title="Clear entire tree"
                 >
@@ -535,22 +540,24 @@ export default function BinaryTreeVisualizer() {
 
           {/* 💡 Usage Hints */}
           <p className="btv-hint">
-            💡 Insert multiple values instantly, then select a traversal to visualize the path and visiting order.
-            Press <kbd>N</kbd> to advance in step-by-step mode. Use <kbd>Shift</kbd>+<kbd>Enter</kbd> to delete values.
+            💡 Insert multiple values instantly, then select a traversal to
+            visualize the path and visiting order. Press <kbd>N</kbd> to advance
+            in step-by-step mode. Use <kbd>Shift</kbd>+<kbd>Enter</kbd> to
+            delete values.
           </p>
         </div>
       </header>
 
       {/* 🎨 Visualization Canvas */}
-      <section 
-        className="btv-canvas" 
-        role="region" 
+      <section
+        className="btv-canvas"
+        role="region"
         aria-label="Binary tree visualization"
         aria-live="polite"
       >
-        <svg 
-          className="btv-svg" 
-          viewBox={laidOut.viewBox.join(" ")} 
+        <svg
+          className="btv-svg"
+          viewBox={laidOut.viewBox.join(" ")}
           preserveAspectRatio="xMidYMid meet"
           aria-label="Tree structure diagram"
         >
@@ -566,29 +573,33 @@ export default function BinaryTreeVisualizer() {
               aria-hidden="true"
             />
           ))}
-          
+
           {/* 🔵 Tree nodes */}
           {laidOut.nodes.map((node) => {
             const isActive = node.id === activeNodeId;
             const inPath = activePath.includes(node.id);
             const isVisited = visited.includes(node.id);
-            
+
             const nodeClasses = [
               "btv-node",
               isActive && "is-active",
               inPath && "in-path",
-              isVisited && "is-visited"
-            ].filter(Boolean).join(" ");
-            
+              isVisited && "is-visited",
+            ]
+              .filter(Boolean)
+              .join(" ");
+
             return (
-              <g 
-                key={node.id} 
-                transform={`translate(${node.x},${node.y})`} 
+              <g
+                key={node.id}
+                transform={`translate(${node.x},${node.y})`}
                 className={nodeClasses}
                 aria-label={`Node with value ${node.val}`}
               >
                 <circle r="20" aria-hidden="true" />
-                <text dy="6" aria-hidden="true">{node.val}</text>
+                <text dy="6" aria-hidden="true">
+                  {node.val}
+                </text>
               </g>
             );
           })}
@@ -632,18 +643,24 @@ export default function BinaryTreeVisualizer() {
             </button>
           </div>
 
-          <div className="btv-order-line" role="list" aria-label="Traversal sequence">
+          <div
+            className="btv-order-line"
+            role="list"
+            aria-label="Traversal sequence"
+          >
             {order.map((value, index) => (
               <React.Fragment key={`${value}-${index}`}>
-                <span 
-                  role="listitem" 
+                <span
+                  role="listitem"
                   className="btv-pill"
                   aria-label={`Position ${index + 1}: ${value}`}
                 >
                   {value}
                 </span>
                 {index < order.length - 1 && (
-                  <span className="btv-arrow" aria-hidden="true">→</span>
+                  <span className="btv-arrow" aria-hidden="true">
+                    →
+                  </span>
                 )}
               </React.Fragment>
             ))}
